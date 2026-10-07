@@ -14,21 +14,32 @@ test.describe('Uchi.ru widget ', () => {
     await page.click('._UCHI_COOKIE__button');
   });
 
-  test('opens', async ({page}) => {
+  test('opens', async () => {
     await widgetPage.openWidget();
 
     await expect(widgetPage.getWidgetBody()).toBeVisible()
   });
 
-  test('has correct title', async ({ page }) => {
+  test('has correct title', async () => {
     await widgetPage.openWidget();
 
-    const articles = await widgetPage.getPopularArticles();
-
-    await articles[0].click();
+    // локатор сам дождётся загрузки списка популярных статей
+    await widgetPage.getPopularArticles().first().click();
 
     await widgetPage.clickWriteToUs();
 
-    expect(await widgetPage.getTitle()).toEqual('Связь с поддержкой');
+    await expect(widgetPage.getTitle()).toHaveText('Связь с поддержкой');
+  });
+
+  // дополнительный тест
+  test('returns to knowledge base from article by back button', async () => {
+    await widgetPage.openWidget();
+
+    await widgetPage.getPopularArticles().first().click();
+
+    await widgetPage.clickBack();
+
+    await expect(widgetPage.getTitle()).toHaveText('База знаний Учи.ру');
+    await expect(widgetPage.getPopularArticles().first()).toBeVisible();
   });
 });
